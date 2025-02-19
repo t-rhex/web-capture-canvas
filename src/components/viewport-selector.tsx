@@ -37,7 +37,7 @@ export function ViewportSelector({
             className="flex items-center space-x-2 transition-all duration-200"
             onClick={() => onSelect(option.id)}
           >
-            <Icon size={20} />
+            <Icon className="w-5 h-5" />
             <span>{option.label}</span>
           </Button>
         );
