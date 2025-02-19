@@ -1,17 +1,32 @@
 
 import { useState } from "react";
 import { UrlInput } from "@/components/url-input";
+import { BatchUrlInput } from "@/components/batch-url-input";
 import { ViewportSelector, type Viewport } from "@/components/viewport-selector";
 import { ScreenshotGallery } from "@/components/screenshot-gallery";
 import { Card, CardContent } from "@/components/ui/card";
-import { Settings, ImageIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ImageIcon } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SettingsDialog } from "@/components/settings-dialog";
+
+interface CaptureSettings {
+  delay: number;
+  fullPage: boolean;
+  hideAds: boolean;
+  hideCookieBanners: boolean;
+}
 
 export default function Index() {
   const [selectedViewports, setSelectedViewports] = useState<Viewport[]>(["desktop"]);
   const [screenshots, setScreenshots] = useState<
     Array<{ url: string; viewport: Viewport; timestamp: string; imageUrl?: string }>
   >([]);
+  const [settings, setSettings] = useState<CaptureSettings>({
+    delay: 0,
+    fullPage: false,
+    hideAds: true,
+    hideCookieBanners: true,
+  });
 
   const handleViewportSelect = (viewport: Viewport) => {
     setSelectedViewports((prev) =>
@@ -30,6 +45,17 @@ export default function Index() {
     setScreenshots((prev) => [...newScreenshots, ...prev]);
   };
 
+  const handleBatchUrlSubmit = (urls: string[]) => {
+    const newScreenshots = urls.flatMap((url) =>
+      selectedViewports.map((viewport) => ({
+        url,
+        viewport,
+        timestamp: new Date().toLocaleTimeString(),
+      }))
+    );
+    setScreenshots((prev) => [...newScreenshots, ...prev]);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20">
       <header className="border-b border-white/10 backdrop-blur-sm fixed top-0 left-0 right-0 z-50">
@@ -38,9 +64,7 @@ export default function Index() {
             <ImageIcon className="w-6 h-6" />
             <span className="font-semibold">Screenshot Generator</span>
           </div>
-          <Button variant="ghost" size="icon">
-            <Settings className="w-5 h-5" />
-          </Button>
+          <SettingsDialog settings={settings} onSettingsChange={setSettings} />
         </div>
       </header>
 
@@ -57,10 +81,24 @@ export default function Index() {
 
         <Card className="w-full max-w-3xl p-6 animate-slideUp glass-card">
           <CardContent className="space-y-6">
-            <div className="space-y-4">
-              <label className="text-sm font-medium">Website URL</label>
-              <UrlInput onSubmit={handleUrlSubmit} />
-            </div>
+            <Tabs defaultValue="single" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="single">Single URL</TabsTrigger>
+                <TabsTrigger value="batch">Batch Process</TabsTrigger>
+              </TabsList>
+              <TabsContent value="single">
+                <div className="space-y-4 pt-4">
+                  <label className="text-sm font-medium">Website URL</label>
+                  <UrlInput onSubmit={handleUrlSubmit} />
+                </div>
+              </TabsContent>
+              <TabsContent value="batch">
+                <div className="space-y-4 pt-4">
+                  <label className="text-sm font-medium">Multiple URLs</label>
+                  <BatchUrlInput onSubmit={handleBatchUrlSubmit} />
+                </div>
+              </TabsContent>
+            </Tabs>
 
             <div className="space-y-4">
               <label className="text-sm font-medium">Device Sizes</label>
