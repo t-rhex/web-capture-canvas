@@ -7,7 +7,7 @@ export type Viewport = "desktop" | "tablet" | "mobile";
 interface ViewportOption {
   id: Viewport;
   label: string;
-  icon: React.ComponentType;
+  icon: typeof Monitor | typeof Tablet | typeof Smartphone;
   width: number;
   height: number;
 }

@@ -8,7 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 export default function Index() {
   const [selectedViewports, setSelectedViewports] = useState<Viewport[]>(["desktop"]);
   const [screenshots, setScreenshots] = useState<
-    Array<{ url: string; viewport: Viewport; timestamp: string }>
+    Array<{ url: string; viewport: Viewport; timestamp: string; imageUrl?: string }>
   >([]);
 
   const handleViewportSelect = (viewport: Viewport) => {
