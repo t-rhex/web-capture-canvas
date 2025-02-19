@@ -8,12 +8,20 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ImageIcon } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SettingsDialog } from "@/components/settings-dialog";
+import { CustomViewport } from "@/components/custom-viewport";
+import { ProjectFolders } from "@/components/project-folders";
 
 interface CaptureSettings {
   delay: number;
   fullPage: boolean;
   hideAds: boolean;
   hideCookieBanners: boolean;
+}
+
+interface ProjectFolder {
+  id: string;
+  name: string;
+  createdAt: Date;
 }
 
 export default function Index() {
@@ -27,6 +35,17 @@ export default function Index() {
     hideAds: true,
     hideCookieBanners: true,
   });
+  const [folders, setFolders] = useState<ProjectFolder[]>([]);
+  const [selectedFolder, setSelectedFolder] = useState<string>();
+
+  const handleCreateFolder = (name: string) => {
+    const newFolder: ProjectFolder = {
+      id: Date.now().toString(),
+      name,
+      createdAt: new Date(),
+    };
+    setFolders((prev) => [...prev, newFolder]);
+  };
 
   const handleViewportSelect = (viewport: Viewport) => {
     setSelectedViewports((prev) =>
@@ -34,6 +53,11 @@ export default function Index() {
         ? prev.filter((v) => v !== viewport)
         : [...prev, viewport]
     );
+  };
+
+  const handleCustomViewportAdd = (name: string, width: number, height: number) => {
+    // Here you would add custom viewport logic
+    console.log("Custom viewport:", { name, width, height });
   };
 
   const handleUrlSubmit = (url: string) => {
@@ -79,38 +103,57 @@ export default function Index() {
           </p>
         </div>
 
-        <Card className="w-full max-w-3xl p-6 animate-slideUp glass-card">
-          <CardContent className="space-y-6">
-            <Tabs defaultValue="single" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="single">Single URL</TabsTrigger>
-                <TabsTrigger value="batch">Batch Process</TabsTrigger>
-              </TabsList>
-              <TabsContent value="single">
-                <div className="space-y-4 pt-4">
-                  <label className="text-sm font-medium">Website URL</label>
-                  <UrlInput onSubmit={handleUrlSubmit} />
-                </div>
-              </TabsContent>
-              <TabsContent value="batch">
-                <div className="space-y-4 pt-4">
-                  <label className="text-sm font-medium">Multiple URLs</label>
-                  <BatchUrlInput onSubmit={handleBatchUrlSubmit} />
-                </div>
-              </TabsContent>
-            </Tabs>
-
-            <div className="space-y-4">
-              <label className="text-sm font-medium">Device Sizes</label>
-              <ViewportSelector
-                selected={selectedViewports}
-                onSelect={handleViewportSelect}
+        <div className="w-full grid grid-cols-1 md:grid-cols-[250px_1fr] gap-6">
+          <Card className="h-fit">
+            <CardContent className="p-4">
+              <ProjectFolders
+                folders={folders}
+                onCreateFolder={handleCreateFolder}
+                onSelectFolder={setSelectedFolder}
+                selectedFolder={selectedFolder}
               />
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        <ScreenshotGallery screenshots={screenshots} />
+          <div className="space-y-6">
+            <Card className="w-full p-6 animate-slideUp glass-card">
+              <CardContent className="space-y-6">
+                <Tabs defaultValue="single" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="single">Single URL</TabsTrigger>
+                    <TabsTrigger value="batch">Batch Process</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="single">
+                    <div className="space-y-4 pt-4">
+                      <label className="text-sm font-medium">Website URL</label>
+                      <UrlInput onSubmit={handleUrlSubmit} />
+                    </div>
+                  </TabsContent>
+                  <TabsContent value="batch">
+                    <div className="space-y-4 pt-4">
+                      <label className="text-sm font-medium">Multiple URLs</label>
+                      <BatchUrlInput onSubmit={handleBatchUrlSubmit} />
+                    </div>
+                  </TabsContent>
+                </Tabs>
+
+                <div className="space-y-4">
+                  <label className="text-sm font-medium">Device Sizes</label>
+                  <ViewportSelector
+                    selected={selectedViewports}
+                    onSelect={handleViewportSelect}
+                  />
+                  <div className="pt-4 border-t">
+                    <label className="text-sm font-medium">Custom Size</label>
+                    <CustomViewport onAdd={handleCustomViewportAdd} />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <ScreenshotGallery screenshots={screenshots} />
+          </div>
+        </div>
       </main>
     </div>
   );
